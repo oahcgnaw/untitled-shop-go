@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"backend-go/db"
-	"backend-go/utils"
+	"backend-go/internal/utils"
 	"context"
 	"net/http"
 

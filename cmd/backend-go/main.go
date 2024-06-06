@@ -2,14 +2,24 @@ package main
 
 import (
 	"backend-go/db"
-	"backend-go/handlers"
+	"backend-go/internal/handlers"
 
+	"time"
+
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
 	db.ConnectDB()
     router := gin.Default()
+
+    router.Use(cors.New(cors.Config{
+        AllowOrigins:     []string{"*"},
+        AllowMethods:     []string{"GET", "POST", "PATCH", "DELETE", "OPTIONS"},
+        AllowHeaders:     []string{"Origin", "Content-Type", "Authorization"},
+        MaxAge:           12 * time.Hour,
+    }))
 
     api := router.Group("/api/v1")
     {

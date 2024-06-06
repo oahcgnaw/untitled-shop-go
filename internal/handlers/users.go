@@ -2,8 +2,8 @@ package handlers
 
 import (
 	"backend-go/db"
-	"backend-go/models"
-	"backend-go/utils"
+	"backend-go/internal/models"
+	"backend-go/internal/utils"
 	"context"
 	"net/http"
 	"os"

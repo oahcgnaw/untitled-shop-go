@@ -2,8 +2,10 @@ package utils
 
 import (
 	"backend-go/db"
+	"backend-go/internal/models"
 	"context"
 	"errors"
+	"fmt"
 	"os"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -18,34 +20,43 @@ type User struct {
 }
 
 // Function to get user by token
-func GetUserByToken(token string) (*User, error) {
-    if token == "" || os.Getenv("JWT_SECRET") == "" {
-        return nil, errors.New("invalid token or secret")
-    }
-    claims := &jwt.RegisteredClaims{}
-    jwtToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
-        return []byte(os.Getenv("JWT_SECRET")), nil
-    })
-    if err != nil || !jwtToken.Valid {
-        return nil, errors.New("invalid token")
-    }
-    userID, err := primitive.ObjectIDFromHex(claims.Subject)
-    if err != nil {
-        return nil, errors.New("invalid user id")
-    }
-    collection := db.GetCollection("users")
-    var user User
-    err = collection.FindOne(context.Background(), bson.M{"_id": userID}).Decode(&user)
-    if err != nil {
-        return nil, err
-    }
-    return &user, nil
+func GetUserByToken(token string) (*models.User, error) {
+	if token == "" || os.Getenv("JWT_SECRET") == "" {
+		return nil, errors.New("invalid token or secret")
+	}
+	claims := &jwt.RegisteredClaims{}
+	jwtToken, err := jwt.ParseWithClaims(token, claims, func(token *jwt.Token) (interface{}, error) {
+    return []byte(os.Getenv("JWT_SECRET")), nil
+	})
+	if err != nil {
+		fmt.Println("Token parsing error:", err)
+		return nil, errors.New("invalid token")
+	}
+	if !jwtToken.Valid {
+		fmt.Println("Token is not valid")
+		return nil, errors.New("invalid token")
+	}
+	userID, err := primitive.ObjectIDFromHex(claims.Subject)
+	if err != nil {
+		fmt.Println("Invalid user ID in token claims:", err)
+		return nil, errors.New("invalid user id")
+	}
+	collection := db.GetCollection("users")
+	var user models.User
+	err = collection.FindOne(context.Background(), bson.M{"_id": userID}).Decode(&user)
+	if err != nil {
+		fmt.Println("User lookup error:", err)
+		return nil, err
+	}
+	return &user, nil
 }
 
 
+
 func GenerateToken(userID string, secret string) (string, error) {
-    token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.RegisteredClaims{
-        Subject:   userID,
-    })
-    return token.SignedString([]byte(secret))
+	claims := jwt.RegisteredClaims{
+		Subject: userID,
+	}
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	return token.SignedString([]byte(secret))
 }

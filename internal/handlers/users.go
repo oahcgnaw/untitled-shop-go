@@ -48,8 +48,8 @@ func CreateUser(c *gin.Context) {
 
 // POST /api/v1/login
 func LoginUser(c *gin.Context) {
-	var reqBody struct{
-		Email string `json:"email"`
+	var reqBody struct {
+		Email    string `json:"email"`
 		Password string `json:"password"`
 	}
 	if err := c.BindJSON(&reqBody); err != nil {
@@ -78,7 +78,7 @@ func LoginUser(c *gin.Context) {
 	token, err := utils.GenerateToken(user.ID.Hex(), os.Getenv("JWT_SECRET"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate token"})
+		return
 	}
-	c.JSON(http.StatusOK, gin.H{"success": true,"message": "Login successful" ,"token": token})
-
+	c.JSON(http.StatusOK, gin.H{"success": true, "message": "Login successful", "token": token})
 }

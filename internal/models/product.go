@@ -7,7 +7,7 @@ import (
 )
 
 type Product struct {
-    ID          primitive.ObjectID `bson:"_id,omitempty" json:"id,omitempty"`
+    ID          primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
     Name        string             `bson:"name" json:"name"`
     Image       string             `bson:"image" json:"image"`
     Category    string             `bson:"category" json:"category"`

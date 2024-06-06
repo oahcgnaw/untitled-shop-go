@@ -4,16 +4,19 @@ import (
 	"backend-go/db"
 	"backend-go/internal/utils"
 	"context"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
-// GET /api/v1/cartitems
+// POST /api/v1/cartitems
 func GetCartItems(c *gin.Context) {
 	token := c.GetHeader("auth-token")
 	user, err := utils.GetUserByToken(token)
+	fmt.Println(user)
+	fmt.Println(err)
 	if err != nil || user == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error":"User not found"})
 		return

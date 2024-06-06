@@ -31,6 +31,14 @@ func main() {
 
         api.POST("/signup", handlers.CreateUser)
         api.POST("/login", handlers.LoginUser)
+        api.GET("/popular/:category", handlers.GetPopularProducts)
+
+        newcollection := api.Group("/newcollections")
+        {
+            newcollection.GET("/", handlers.GetNewCollections)
+            newcollection.GET("/:category", handlers.GetNewProductsByCategory)
+        }
+        
     }
 
     router.Run(":4000")

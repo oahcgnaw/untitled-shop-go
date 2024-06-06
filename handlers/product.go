@@ -145,3 +145,78 @@ func GetProductsByCategory(c *gin.Context) {
         "page":     pageNumber,
     })
 }
+
+// GET /api/v1/popular/:category
+func GetPopularProducts(c *gin.Context) {
+    category := c.Param("category")
+    // find and limit 4 documents
+    var products []models.Product
+    collection := db.GetCollection("products")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    cursor, err := collection.Find(ctx, bson.M{"category": category}, options.Find().SetLimit(4))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    defer cursor.Close(ctx)
+
+    for cursor.Next(ctx) {
+        var product models.Product
+        cursor.Decode(&product)
+        products = append(products, product)
+    }
+
+    c.JSON(http.StatusOK, products)
+}
+
+// GET /api/v1/newcollections
+func GetNewCollections(c *gin.Context) {
+    var products []models.Product
+    collection := db.GetCollection("products")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    // find 8 most recent added document
+    cursor, err := collection.Find(ctx, bson.M{}, options.Find().SetSort(bson.D{{"date", -1}}).SetLimit(8))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+        return
+    }
+    defer cursor.Close(ctx)
+
+    for cursor.Next(ctx) {
+        var product models.Product
+        cursor.Decode(&product)
+        products = append(products, product)
+    }
+
+    c.JSON(http.StatusOK, products)
+}
+
+// GET /api/v1/newcollections/:category
+
+func GetNewProductsByCategory(c *gin.Context) {
+    category := c.Param("category")
+    var products []models.Product
+
+    collection := db.GetCollection("products")
+    ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+
+    // find 4 most recent added document of a certain category
+    cursor, err := collection.Find(ctx, bson.M{"category": category}, options.Find().SetSort(bson.D{{"date", -1}}).SetLimit(4))
+    if err != nil {
+        c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+    }
+    defer cursor.Close(ctx)
+
+    for cursor.Next(ctx) {
+        var product models.Product
+        cursor.Decode(&product)
+        products = append(products, product)
+    }
+
+    c.JSON(http.StatusOK, products)
+}

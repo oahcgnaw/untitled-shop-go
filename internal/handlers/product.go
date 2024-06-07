@@ -115,7 +115,7 @@ func GetProductsByCategory(c *gin.Context) {
     }
     skip := 10 * (pageNumber - 1)
 
-    var products []models.Product
+    products := []models.Product{} 
     collection := db.GetCollection("products")
     ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
     defer cancel()

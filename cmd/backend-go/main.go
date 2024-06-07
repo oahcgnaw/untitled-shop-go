@@ -14,10 +14,16 @@ import (
 )
 
 func main() {
-    err := godotenv.Load()
-    if err != nil {
-        log.Fatalf("Error loading .env file")
+
+    env := os.Getenv("SERVE_MODE")
+    if env != "production" {
+        err := godotenv.Load()
+        if err != nil {
+            log.Fatalf("Error loading .env file")
+        }
     }
+
+    // Connect to the database
 	db.ConnectDB()
     router := gin.Default()
 

@@ -34,5 +34,11 @@ func ConnectDB() {
 }
 
 func GetCollection(collectionName string) *mongo.Collection {
-	return Client.Database("eshop_dev").Collection(collectionName)
+	serve_mode := os.Getenv("SERVE_MODE")
+	if serve_mode == "dev" {
+		return Client.Database("eshop_dev").Collection(collectionName)
+	} else {
+		return Client.Database("eshop").Collection(collectionName)
+	}
+	
 }

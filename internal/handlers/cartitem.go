@@ -4,8 +4,8 @@ import (
 	"backend-go/db"
 	"backend-go/internal/utils"
 	"context"
-	"fmt"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.mongodb.org/mongo-driver/bson"
@@ -15,8 +15,6 @@ import (
 func GetCartItems(c *gin.Context) {
 	token := c.GetHeader("auth-token")
 	user, err := utils.GetUserByToken(token)
-	fmt.Println(user)
-	fmt.Println(err)
 	if err != nil || user == nil {
 		c.JSON(http.StatusNotFound, gin.H{"error":"User not found"})
 		return
@@ -45,7 +43,9 @@ func UpdateCartItem(c *gin.Context) {
 	}
 	cartData[req.ItemID]++
 	collection := db.GetCollection("users")
-	_, err = collection.UpdateOne(context.Background(), bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"cartData": cartData}})
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+    defer cancel()
+	_, err = collection.UpdateOne(ctx, bson.M{"_id": user.ID}, bson.M{"$set": bson.M{"cartData": cartData}})
 	if err != nil {
         c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update cart"})
         return

@@ -7,6 +7,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/golang-jwt/jwt/v5"
 	"go.mongodb.org/mongo-driver/bson"
@@ -43,7 +44,9 @@ func GetUserByToken(token string) (*models.User, error) {
 	}
 	collection := db.GetCollection("users")
 	var user models.User
-	err = collection.FindOne(context.Background(), bson.M{"_id": userID}).Decode(&user)
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+	err = collection.FindOne(ctx, bson.M{"_id": userID}).Decode(&user)
 	if err != nil {
 		fmt.Println("User lookup error:", err)
 		return nil, err
